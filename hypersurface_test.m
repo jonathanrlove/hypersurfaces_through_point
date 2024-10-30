@@ -1,17 +1,17 @@
-load "points.magma";
+load "points.m";
 
-function IncidentHypersurfaceDim(d,P)
+function IncidentHypersurfaceDim(d, P, F0)
     // Input positive integer d, and (n+1)-tuple P = [a_0, ..., a_n], where each 
-    // a_i is in extension GF(F_{q^r}) of GF(F_q). Returns the dimension of the 
-    // space of degree d hypersurfaces over F_q passing through P.
+    // a_i is in extension of F0. Returns the dimension of the 
+    // space of degree d hypersurfaces over F0 passing through P.
 
     n := #P - 1;
     allmonomials := [];
     for sub in Subsets({1..n+d}, n) do
         s := Sort(Setseq(sub));
         exp := [s[1]-1] cat [s[i+1]-s[i]-1 : i in [1..n-1]] cat [n+d-s[n]];
-        mon := &*[P[i]^exp[i] : i in [1..n+1]];
-        Append(~allmonomials, Eltseq(mon));
+        y := &*[P[i]^exp[i] : i in [1..n+1]];
+        Append(~allmonomials, Eltseq(y, F0));
     end for;
     return Binomial(n+d,n) - Rank(Matrix(allmonomials));
 end function;
@@ -35,7 +35,7 @@ procedure test(cases)
         m := Binomial(n+d, n);
         P := points[tup];
         t := Cputime();
-        expecteddim := IncidentHypersurfaceDim(d, P) eq Max(0, m-r);
+        expecteddim := IncidentHypersurfaceDim(d, P, GF(q)) eq Max(0, m-r);
         assert expecteddim;          // Will raise an error if expecteddim is false
         printf "%o: %o (%os)\n", tup, expecteddim, Cputime(t);
     end for;
